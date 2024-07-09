@@ -23,7 +23,7 @@ export class CategoryController {
     return this.categoryService.getAllCategory();
   }
 
-  @Get('/one')
+  @Get('/one/:id')
   getOneCategory(
     @Param('id')
     categoryId: string,
