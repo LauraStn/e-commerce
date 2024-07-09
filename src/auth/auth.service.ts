@@ -12,19 +12,21 @@
 // import * as argon from 'argon2';
 
 import {
-    BadRequestException,
-    ForbiddenException,
-    Injectable,
-  } from '@nestjs/common';
-  import { PrismaService } from 'src/prisma/prisma.service';
- 
-  import * as argon from 'argon2';
-  import { JwtService } from '@nestjs/jwt';
-  import { ConfigService } from '@nestjs/config';
-  import { EmailService } from 'src/email/email.service';
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+import * as argon from 'argon2';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { EmailService } from 'src/email/email.service';
 import { SigninDto } from './dto/auth.signin.dto';
 import { SignupDto } from './dto/auth.signup.dto';
-  
+import { NotFoundError } from 'rxjs';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -53,7 +55,9 @@ export class AuthService {
     }
 
     const hash = await argon.hash(dto.password);
+    
     const activationToken = await argon.hash(`${dto.email}+${dto.pseudo}`);
+    const cleanToken = activationToken.replaceAll('/', '');
 
     const user = await this.prisma.user.create({
       data: {
@@ -63,10 +67,10 @@ export class AuthService {
         pseudo: dto.pseudo,
         roleId: 'a2deefca-a4fb-4f52-9dec-98a4b958f233',
         password: hash,
-        token: activationToken,
+        token: cleanToken,
       },
     });
-    await this.emailService.sendUserConfirmation(user, activationToken);
+    await this.emailService.sendUserConfirmation(user, cleanToken);
     return this.signToken(user.id);
   }
 
@@ -85,6 +89,27 @@ export class AuthService {
       throw new ForbiddenException('Invalid crendentials');
     }
     return this.signToken(user.id);
+  }
+
+  async validateAccount(token: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        token: token,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('Not found');
+    }
+    const validateAccount = await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        isActive: true,
+        token: null,
+      },
+    });
+    return validateAccount;
   }
 
   async signToken(userId: string): Promise<{ access_token: string }> {
