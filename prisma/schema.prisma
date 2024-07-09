@@ -81,7 +81,8 @@ model Cart {
   userId     String
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
-  
+  totalCart  Float?
+
   user       User        @relation(fields: [userId], references: [id])
   cartItems  CartItem[]
 }
@@ -92,7 +93,8 @@ model CartItem {
   productId  String
   quantity   Int         @default(1)
   addedAt    DateTime    @default(now())
-
+  price      Float
+  
   cart       Cart        @relation(fields: [cartId], references: [id])
   product    Product     @relation(fields: [productId], references: [id])
 }

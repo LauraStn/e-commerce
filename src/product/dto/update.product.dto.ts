@@ -1,15 +1,10 @@
 import {
-  IsDateString,
   IsNotEmpty,
   IsNumber,
   IsString,
-  IsUUID,
 } from 'class-validator';
 
-export class InsertProductDto {
-  @IsString()
-  name: string;
-
+export class UpdateProductDto {
   @IsString()
   image: string;
 
@@ -22,8 +17,4 @@ export class InsertProductDto {
 
   @IsNumber()
   stock: number;
-
-  @IsString()
-  @IsUUID()
-  categoryId: string;
 }
