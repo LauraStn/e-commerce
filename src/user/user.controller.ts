@@ -22,13 +22,12 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
-  @Get('/one/:id')
+  @Get('/one')
   getOneProduct(
-    @Param('id')
-    userId: string,
-    @GetUser() user: User,
+    @GetUser()
+    user: User,
   ) {
-    return this.userService.getOneUser(userId, user.id);
+    return this.userService.getOneUser(user.id);
   }
 
   @UseGuards(JwtGuard)

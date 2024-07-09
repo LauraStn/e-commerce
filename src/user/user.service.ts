@@ -29,8 +29,7 @@ export class UserService {
     });
   }
 
-  async getOneUser(userId: string, userAdmin: string) {
-    await checkuserIsAdmin(userAdmin);
+  async getOneUser(userId: string) {
     return this.prisma.user.findUnique({
       where: {
         id: userId,

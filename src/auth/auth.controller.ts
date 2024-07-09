@@ -2,6 +2,7 @@ import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SigninDto } from './dto/auth.signin.dto';
 import { SignupDto } from './dto/auth.signup.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -19,5 +20,9 @@ export class AuthController {
   @Patch('/validate/:token')
   validateAccount(@Param('token') token: string) {
     return this.authService.validateAccount(token);
+  }
+  @Post('/reset')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }

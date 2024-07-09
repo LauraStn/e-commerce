@@ -33,4 +33,17 @@ export class EmailService {
       html: emailHtml,
     });
   }
+  async sendResetPassword(user: User, token: string) {
+    const url = `${this.config.get('SERVER_URL')}/user/redirectPassword/${token}`;
+    const emailHtml = `<p>Hey ${user.firstName},</p>
+        <p>Someone (probably you) requested to reset the password to your account.</p>
+           <p> If you didn\'t submit this request, ignore this email, and your password will not be changed. Please click on this link:<a href='${url}'>Reset Password</a></p>`;
+
+    await this.transporter.sendMail({
+      from: this.config.get('SMTP_EMAIL'),
+      to: user.email,
+      subject: 'Reset password',
+      html: emailHtml,
+    });
+  }
 }

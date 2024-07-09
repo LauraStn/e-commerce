@@ -26,6 +26,7 @@ import { EmailService } from 'src/email/email.service';
 import { SigninDto } from './dto/auth.signin.dto';
 import { SignupDto } from './dto/auth.signup.dto';
 import { NotFoundError } from 'rxjs';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -55,7 +56,7 @@ export class AuthService {
     }
 
     const hash = await argon.hash(dto.password);
-    
+
     const activationToken = await argon.hash(`${dto.email}+${dto.pseudo}`);
     const cleanToken = activationToken.replaceAll('/', '');
 
@@ -71,7 +72,6 @@ export class AuthService {
       },
     });
     await this.emailService.sendUserConfirmation(user, cleanToken);
-    return this.signToken(user.id);
   }
 
   async signin(dto: SigninDto) {
@@ -111,7 +111,30 @@ export class AuthService {
     });
     return validateAccount;
   }
-
+  async resetPassword(dto: ResetPasswordDto) {
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: dto.email }, { pseudo: dto.pseudo }],
+      },
+    });
+    if (!existingUser) {
+      throw new ForbiddenException('Email not found');
+    }
+    const activationToken = await argon.hash(
+      `${existingUser.email}+${existingUser.pseudo}`,
+    );
+    const cleanToken = activationToken.replaceAll('/', '');
+    const udpateUserToken = await this.prisma.user.update({
+      where: {
+        email: existingUser.email,
+      },
+      data: {
+        token: cleanToken,
+      },
+    });
+    await this.emailService.sendResetPassword(existingUser, cleanToken);
+    return 'Email sent with link to reset your password';
+  }
   async signToken(userId: string): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
