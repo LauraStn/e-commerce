@@ -25,7 +25,6 @@ import { ConfigService } from '@nestjs/config';
 import { EmailService } from 'src/email/email.service';
 import { SigninDto } from './dto/auth.signin.dto';
 import { SignupDto } from './dto/auth.signup.dto';
-import { NotFoundError } from 'rxjs';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
