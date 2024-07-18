@@ -6,6 +6,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CartItemDto } from './dto/cart-item.dto';
 import { CartService } from 'src/cart/cart.service';
+import { allowedNodeEnvironmentFlags } from 'process';
 
 @Injectable()
 export class CartItemService {
@@ -23,12 +24,19 @@ export class CartItemService {
         cartItems: true,
       },
     });
-    return userCart;
+
+    const allCartItem = await this.prisma.cartItem.findMany({
+      where: {
+        cartId: userCart.id,
+      },
+      include: {
+        product: true,
+      },
+    });
+    return allCartItem;
   }
 
   async addCartItem(userId: string, productId: string, dto: CartItemDto) {
-    await this.Cart.createCart(userId);
-
     const userCart = await this.prisma.cart.findFirst({
       where: {
         userId: userId,
@@ -122,6 +130,7 @@ export class CartItemService {
     const existingCartItem = userCart.cartItems.find(
       (item) => item.id === cartItemId,
     );
+
     if (existingCartItem) {
       await this.prisma.cartItem.delete({
         where: {
@@ -129,5 +138,7 @@ export class CartItemService {
         },
       });
     }
+    await this.Cart.updateCart(userId, userCart.id);
+    return { msg: 'Product removed !' };
   }
 }

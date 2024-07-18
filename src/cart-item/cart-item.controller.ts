@@ -13,7 +13,7 @@ import { CartItemDto } from './dto/cart-item.dto';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
-
+@UseGuards(JwtGuard)
 @Controller('cart-item')
 export class CartItemController {
   constructor(private readonly cartItemService: CartItemService) {}
@@ -23,7 +23,6 @@ export class CartItemController {
     return this.cartItemService.getAllCartItem(user.id);
   }
 
-  @UseGuards(JwtGuard)
   @Post('/add/:id')
   addProduct(
     @Body()
@@ -35,7 +34,6 @@ export class CartItemController {
     return this.cartItemService.addCartItem(user.id, productId, dto);
   }
 
-  @UseGuards(JwtGuard)
   @Patch('/update/:id')
   updateProduct(
     @Body()
@@ -47,13 +45,14 @@ export class CartItemController {
     return this.cartItemService.updateCartItem(user.id, cartItemId, dto);
   }
 
-  @UseGuards(JwtGuard)
   @Delete('/delete/:id')
   deleteProduct(
     @GetUser() user: User,
     @Param('id')
     cartItemId: string,
   ) {
+    console.log(cartItemId);
+
     return this.cartItemService.deleteCartItem(user.id, cartItemId);
   }
 }

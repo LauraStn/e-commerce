@@ -24,7 +24,8 @@ export class UserService {
         isActive: true,
         roleId: true,
         orders: true,
-        carts: true,
+        cart: true,
+       
       },
     });
   }
@@ -45,7 +46,7 @@ export class UserService {
         isActive: true,
         roleId: true,
         orders: true,
-        carts: true,
+        cart: true,
       },
     });
   }

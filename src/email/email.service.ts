@@ -19,7 +19,7 @@ export class EmailService {
   }
 
   async sendUserConfirmation(user: User, token: string) {
-    const url = `${this.config.get('SERVER_URL')}/user/validate/${token}`;
+    const url = `${this.config.get('SERVER_URL')}/auth/validate/${token}`;
     const emailHtml = `<p>Hey ${user.firstName},</p>
         <p>Your requested an account creation on shop video games</p>
             <a href='${url}'>You requested an account creation on shop video games, click here 

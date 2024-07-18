@@ -1,15 +1,3 @@
-// import {
-//   BadRequestException,
-//   ForbiddenException,
-//   Injectable,
-// } from '@nestjs/common';
-// import { ConfigService } from '@nestjs/config';
-// import { JwtService } from '@nestjs/jwt';
-// import { EmailService } from 'src/email/email.service';
-// import { PrismaService } from 'src/prisma/prisma.service';
-// import { SigninDto } from './dto/auth.signin.dto';
-// import { SignupDto } from './dto/auth.signup.dto';
-// import * as argon from 'argon2';
 
 import {
   BadRequestException,
@@ -26,6 +14,7 @@ import { EmailService } from 'src/email/email.service';
 import { SigninDto } from './dto/auth.signin.dto';
 import { SignupDto } from './dto/auth.signup.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +23,8 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private emailService: EmailService,
+    private Cart: CartService,
+
   ) {}
   async signup(dto: SignupDto) {
     if (
@@ -45,19 +36,30 @@ export class AuthService {
     ) {
       throw new BadRequestException('Missing fields');
     }
-    const exisingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
       },
     });
-    if (exisingUser) {
+    if (existingUser) {
       throw new ForbiddenException('Email already taken');
     }
-
+    const existingPseudo = await this.prisma.user.findUnique({
+      where: {
+        pseudo: dto.pseudo,
+      },
+    });
+    if (existingPseudo) {
+      throw new ForbiddenException('Pseudo already taken');
+    }
     const hash = await argon.hash(dto.password);
-
+    const userRole = await this.prisma.role.findUnique({
+      where: {
+        name: 'user',
+      },
+    });
     const activationToken = await argon.hash(`${dto.email}+${dto.pseudo}`);
-    const cleanToken = activationToken.replaceAll('/', '');
+    const cleanToken = activationToken.replaceAll('/', 'j');
 
     const user = await this.prisma.user.create({
       data: {
@@ -65,12 +67,14 @@ export class AuthService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         pseudo: dto.pseudo,
-        roleId: 'a2deefca-a4fb-4f52-9dec-98a4b958f233',
+        roleId: userRole.id,
         password: hash,
         token: cleanToken,
       },
     });
+
     await this.emailService.sendUserConfirmation(user, cleanToken);
+    return 'Email sent with link to activate your account';
   }
 
   async signin(dto: SigninDto) {
@@ -82,12 +86,18 @@ export class AuthService {
     if (!user) {
       throw new ForbiddenException('Invalid crendentials');
     }
-
+    if(user.isActive=== false) {
+      throw new ForbiddenException('Inactive account');
+    }
     const isValidPassword = await argon.verify(user.password, dto.password);
     if (!isValidPassword) {
       throw new ForbiddenException('Invalid crendentials');
     }
-    return this.signToken(user.id);
+    const token = await this.signToken(user.id);
+    return {
+      token,
+      role: user.roleId,
+    };
   }
 
   async validateAccount(token: string) {
@@ -99,6 +109,8 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('Not found');
     }
+    await this.Cart.createCart(user.id);
+
     const validateAccount = await this.prisma.user.update({
       where: {
         id: user.id,
@@ -110,6 +122,7 @@ export class AuthService {
     });
     return validateAccount;
   }
+
   async resetPassword(dto: ResetPasswordDto) {
     const existingUser = await this.prisma.user.findFirst({
       where: {
@@ -134,6 +147,7 @@ export class AuthService {
     await this.emailService.sendResetPassword(existingUser, cleanToken);
     return 'Email sent with link to reset your password';
   }
+
   async signToken(userId: string): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,

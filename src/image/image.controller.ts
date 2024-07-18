@@ -34,6 +34,7 @@ export class ImageController {
   )
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     return file.filename;
+
   }
 
   @Get('/view/:filename')

@@ -6,7 +6,7 @@ import {
 
 export class UpdateProductDto {
   @IsString()
-  image: string;
+  name: string;
 
   @IsString()
   @IsNotEmpty()

@@ -39,6 +39,8 @@ export class ProductController {
     dto: InsertProductDto,
     @GetUser() user: User,
   ) {
+    console.log(dto);
+    
     return this.productService.addProduct(user.id, dto);
   }
 
