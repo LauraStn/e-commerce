@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
@@ -64,5 +65,10 @@ export class ProductController {
     productId: string,
   ) {
     return this.productService.deleteProduct(user.id, productId);
+  }
+
+  @Get('search')
+  async searchUsers(@Query('query') query: string) {
+    return this.productService.searchUsers(query);
   }
 }

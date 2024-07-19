@@ -14,7 +14,7 @@ export class ProductService {
         createdAt: 'desc',
       },
       skip: 0,
-      take: 20,
+      take: 40,
     });
   }
 
@@ -83,6 +83,16 @@ export class ProductService {
     await this.prisma.product.delete({
       where: {
         id: existingproduct.id,
+      },
+    });
+  }
+
+  async searchUsers(query: string) {
+    return this.prisma.product.findMany({
+      where: {
+        name: {
+          contains: query,
+        },
       },
     });
   }

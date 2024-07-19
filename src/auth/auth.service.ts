@@ -87,7 +87,7 @@ export class AuthService {
       throw new ForbiddenException('Invalid crendentials');
     }
     if(user.isActive=== false) {
-      throw new ForbiddenException('Inactive account');
+    throw new ForbiddenException('Inactive account');
     }
     const isValidPassword = await argon.verify(user.password, dto.password);
     if (!isValidPassword) {
