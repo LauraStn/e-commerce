@@ -1,9 +1,9 @@
-
 import {
   BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Redirect,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -24,7 +24,6 @@ export class AuthService {
     private config: ConfigService,
     private emailService: EmailService,
     private Cart: CartService,
-
   ) {}
   async signup(dto: SignupDto) {
     if (
@@ -86,7 +85,7 @@ export class AuthService {
     if (!user) {
       throw new ForbiddenException('Invalid crendentials');
     }
-    if(user.isActive=== false) {
+    if (user.isActive === false) {
       throw new ForbiddenException('Inactive account');
     }
     const isValidPassword = await argon.verify(user.password, dto.password);
@@ -107,7 +106,7 @@ export class AuthService {
       },
     });
     if (!user) {
-      throw new NotFoundException('Not found');
+      return false
     }
     await this.Cart.createCart(user.id);
 
@@ -120,7 +119,8 @@ export class AuthService {
         token: null,
       },
     });
-    return validateAccount;
+    
+    return true;
   }
 
   async resetPassword(dto: ResetPasswordDto) {

@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -31,13 +32,15 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
-  @Patch('/ban/:id')
+  @Patch('/ban')
   banUser(
-    @Param('id')
-    userId: string,
     @GetUser() user: User,
+    @Body() // @Param('id')
+    userId: User,
   ) {
-    return this.userService.banUser(userId, user.id);
+    console.log(userId);
+
+    return this.userService.banUser(userId.id, user.id);
   }
 
   @UseGuards(JwtGuard)

@@ -73,6 +73,8 @@ export async function checkuserIsAdmin(jwtId: string) {
         role: true,
       },
     });
+    console.log(user);
+
     if (!user || !user.id) {
       throw new ForbiddenException('Access to resources denied2');
     }

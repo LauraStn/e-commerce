@@ -25,7 +25,6 @@ export class UserService {
         roleId: true,
         orders: true,
         cart: true,
-       
       },
     });
   }
@@ -53,15 +52,22 @@ export class UserService {
 
   async banUser(userId: string, userAdmin: string) {
     await checkuserIsAdmin(userAdmin);
-
-    const banUser = await this.prisma.user.update({
+    const existingUser = await this.prisma.user.findUnique({
       where: {
         id: userId,
+      },
+    });
+    console.log(existingUser);
+    
+    const banUser = await this.prisma.user.update({
+      where: {
+        id: existingUser.id,
       },
       data: {
         isActive: false,
       },
     });
+    return banUser;
   }
 
   async deleteUser(userId: string, userAdmin: string) {
@@ -74,6 +80,12 @@ export class UserService {
     if (!existingUser || !existingUser.id) {
       throw new ForbiddenException('does not exist');
     }
+
+    await this.prisma.cart.delete({
+      where: {
+        id: existingUser.id,
+      },
+    });
     await this.prisma.user.delete({
       where: {
         id: existingUser.id,
