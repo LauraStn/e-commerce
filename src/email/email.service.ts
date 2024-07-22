@@ -21,8 +21,8 @@ export class EmailService {
   async sendUserConfirmation(user: User, token: string) {
     const url = `${this.config.get('SERVER_URL')}/auth/validate/${token}`;
     const emailHtml = `<p>Hey ${user.firstName},</p>
-        <p>Your requested an account creation on shop video games</p>
-            <a href='${url}'>You requested an account creation on shop video games, click here 
+        <p>Your requested an account creation on pigeonmania</p>
+            <a href='${url}'>You requested an account creation on pigeonmania, click here 
             to activate your account</a>
         <p>If you did not request this email you can safely ignore it.</p>`;
 
@@ -33,6 +33,7 @@ export class EmailService {
       html: emailHtml,
     });
   }
+  
   async sendResetPassword(user: User, token: string) {
     const url = `${this.config.get('SERVER_URL')}/user/redirectPassword/${token}`;
     const emailHtml = `<p>Hey ${user.firstName},</p>

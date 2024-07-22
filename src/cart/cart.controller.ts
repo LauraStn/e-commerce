@@ -20,14 +20,14 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get('/one')
-  getOneCart(
-    @GetUser() user: User,
-  ) {
+  getOneCart(@GetUser() user: User) {
     return this.cartService.getOneCart(user.id);
   }
 
   @Post('/add')
   createCart(@GetUser() user: User) {
+    console.log(user);
+
     return this.cartService.createCart(user.id);
   }
 
@@ -40,12 +40,13 @@ export class CartController {
     return this.cartService.updateCart(user.id, cartId);
   }
 
-  @Delete('/delete/:id')
-  deleteCart(
-    @Param('id')
-    cartId: string,
-    @GetUser() user: User,
-  ) {
-    return this.cartService.deleteCart(user.id, cartId);
+  @Delete('/clearCart')
+  deleteCartItem(@GetUser() user: User) {
+    return this.cartService.deleteCartItem(user.id);
+  }
+
+  @Delete('/delete')
+  deleteCart(@GetUser() user: User) {
+    return this.cartService.deleteCart(user.id);
   }
 }
