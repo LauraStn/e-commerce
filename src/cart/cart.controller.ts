@@ -13,6 +13,7 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { InsertProductDto } from 'src/product/dto/insert.product.dto';
+import { log } from 'console';
 
 @UseGuards(JwtGuard)
 @Controller('cart')
@@ -26,8 +27,6 @@ export class CartController {
 
   @Post('/add')
   createCart(@GetUser() user: User) {
-    console.log(user);
-
     return this.cartService.createCart(user.id);
   }
 
@@ -46,7 +45,9 @@ export class CartController {
   }
 
   @Delete('/delete')
-  deleteCart(@GetUser() user: User) {
+  deleteCart(@Body() user: User) {
+    console.log('hey');
+    
     return this.cartService.deleteCart(user.id);
   }
 }
