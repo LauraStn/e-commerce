@@ -52,26 +52,19 @@ export class CartService {
       },
     });
   }
-  async deleteCart(userId: string) {
+  async deleteCart(userId1: string) {
     const userCart = await this.prisma.cart.findFirst({
       where: {
-        userId: userId,
-      },
-      include: {
-        cartItems: true,
-      },
+        userId: userId1,
+      }
     });
-
-    await this.prisma.cartItem.deleteMany({
-      where: {
-        cartId: userCart.id,
-      },
-    });
+    console.log(userCart);
+    
     await this.prisma.cart.delete({
       where: {
-        userId: userCart.id
-      }
-    })
+        userId: userCart.userId,
+      },
+    });
   }
 
   async deleteCartItem(userId: string) {
@@ -91,5 +84,4 @@ export class CartService {
     });
     await this.updateCart(userId, userCart.id);
   }
-
 }

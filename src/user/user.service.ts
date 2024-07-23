@@ -1,10 +1,14 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { CartService } from 'src/cart/cart.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { checkuserIsAdmin } from 'src/utils/checkRole';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private Cart: CartService,
+  ) {}
 
   async getAllUsers(userId: string) {
     await checkuserIsAdmin(userId);
@@ -58,7 +62,7 @@ export class UserService {
       },
     });
     console.log(existingUser);
-    
+
     const banUser = await this.prisma.user.update({
       where: {
         id: existingUser.id,
@@ -76,16 +80,18 @@ export class UserService {
       where: {
         id: userId,
       },
-    });
-    if (!existingUser || !existingUser.id) {
-      throw new ForbiddenException('does not exist');
-    }
-
-    await this.prisma.cart.delete({
-      where: {
-        id: existingUser.id,
+      include: {
+        cart: true,
       },
     });
+    if (!existingUser) {
+      throw new ForbiddenException('does not exist');
+    }
+    console.log(existingUser);
+    if (existingUser.cart || existingUser.cart === null) {
+      await this.Cart.deleteCart(existingUser.id);
+      return;
+    }
     await this.prisma.user.delete({
       where: {
         id: existingUser.id,
