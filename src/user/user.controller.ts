@@ -38,8 +38,6 @@ export class UserController {
     @Body() // @Param('id')
     userId: User,
   ) {
-    console.log(userId);
-
     return this.userService.banUser(userId.id, user.id);
   }
 
